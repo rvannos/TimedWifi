@@ -49,6 +49,13 @@
     });
   }
 
+  function triggerCaptivePortalSuccess() {
+    // 1. Local probe endpoint (returns 204 now that client is authenticated)
+    fetch("/generate_204", { mode: "no-cors", cache: "no-store" }).catch(() => {});
+    // 2. Android ConnectivityManager probe
+    fetch("http://connectivitycheck.gstatic.com/generate_204", { mode: "no-cors", cache: "no-store" }).catch(() => {});
+  }
+
   if (form) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -80,6 +87,7 @@
           }
         } else {
           showConnectedView(data.remaining_seconds, false);
+          triggerCaptivePortalSuccess();
         }
       } catch (err) {
         if (errorBox) {
@@ -91,6 +99,19 @@
           connectBtn.disabled = false;
           connectBtn.textContent = "Connect to Pay";
         }
+      }
+    });
+  }
+
+  if (doneBtn) {
+    doneBtn.addEventListener("click", () => {
+      triggerCaptivePortalSuccess();
+      const ua = navigator.userAgent || "";
+      if (/Android/i.test(ua)) {
+        // Navigating to Android's native 204 endpoint signals CaptivePortalLogin to auto-dismiss with a checkmark
+        window.location.href = "http://connectivitycheck.gstatic.com/generate_204";
+      } else {
+        window.location.href = "/generate_204";
       }
     });
   }
