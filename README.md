@@ -52,7 +52,11 @@ Install the required system networking tools and Python packages:
 
 ```bash
 sudo apt update
-sudo apt install -y git python3 python3-pip python3-venv dnsmasq hostapd iptables iw wireless-tools net-tools qrencode
+sudo apt install -y git python3 python3-pip python3-venv dnsmasq hostapd iptables iw net-tools qrencode
+
+# Disable default system-wide daemons so the controller can spawn them on demand with /tmp configs:
+sudo systemctl stop dnsmasq hostapd 2>/dev/null || true
+sudo systemctl disable dnsmasq hostapd 2>/dev/null || true
 ```
 
 Grant your Ubuntu user passwordless `sudo` execution for the networking utilities invoked by [network_driver.py](hotspot-app/backend/network_driver.py):
