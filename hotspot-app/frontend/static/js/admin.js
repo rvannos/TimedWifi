@@ -23,7 +23,43 @@
   const cfgBwMbps = document.getElementById("cfg-bw-mbps");
   const cfgWpaPass = document.getElementById("cfg-wpa-pass");
   const cfgAdminPass = document.getElementById("cfg-admin-pass");
+  const cfgPrimaryColor = document.getElementById("cfg-primary-color");
+  const lblPrimaryColor = document.getElementById("lbl-primary-color");
+  const cfgSecondaryColor = document.getElementById("cfg-secondary-color");
+  const lblSecondaryColor = document.getElementById("lbl-secondary-color");
+  const resetColorsBtn = document.getElementById("reset-colors-btn");
   const topologyHelper = document.getElementById("topology-helper-text");
+
+  function applyThemeColors(primary, secondary) {
+    if (primary) {
+      document.documentElement.style.setProperty("--maroon-deep", primary);
+      if (lblPrimaryColor) lblPrimaryColor.textContent = primary;
+      if (cfgPrimaryColor) cfgPrimaryColor.value = primary;
+    }
+    if (secondary) {
+      document.documentElement.style.setProperty("--gold-primary", secondary);
+      if (lblSecondaryColor) lblSecondaryColor.textContent = secondary;
+      if (cfgSecondaryColor) cfgSecondaryColor.value = secondary;
+    }
+  }
+
+  if (cfgPrimaryColor) {
+    cfgPrimaryColor.addEventListener("input", () => {
+      applyThemeColors(cfgPrimaryColor.value, null);
+    });
+  }
+
+  if (cfgSecondaryColor) {
+    cfgSecondaryColor.addEventListener("input", () => {
+      applyThemeColors(null, cfgSecondaryColor.value);
+    });
+  }
+
+  if (resetColorsBtn) {
+    resetColorsBtn.addEventListener("click", () => {
+      applyThemeColors("#580f1a", "#f2a900");
+    });
+  }
 
   const TOPOLOGY_DESCRIPTIONS = {
     "Mode A": "Mode A (All-in-One): Laptop built-in Wi-Fi (wlan0) runs hostapd in AP mode; WAN is wired Ethernet (eth0).",
@@ -258,6 +294,7 @@
         if (cfgBwMbps) cfgBwMbps.value = s.bandwidth_limit_mbps || 5;
         if (cfgWpaPass) cfgWpaPass.value = s.wpa_passphrase || "";
         if (cfgAdminPass) cfgAdminPass.value = s.admin_password || "admin";
+        applyThemeColors(s.primary_color || "#580f1a", s.secondary_color || "#f2a900");
         updateTopologyHelper(s.mode || "Mode A", false);
       }
 
@@ -314,6 +351,8 @@
         mock_network: cfgMock ? cfgMock.checked : true,
         school_name: cfgSchoolName ? cfgSchoolName.value.trim() : "Event Fast-Pay Wireless",
         ssid: cfgSsid ? cfgSsid.value.trim() : "School_Event_Pay",
+        primary_color: cfgPrimaryColor ? cfgPrimaryColor.value : "#580f1a",
+        secondary_color: cfgSecondaryColor ? cfgSecondaryColor.value : "#f2a900",
         session_duration_minutes: cfgSessionDur ? parseInt(cfgSessionDur.value, 10) : 10,
         pin_rotation_minutes: cfgPinRot ? parseInt(cfgPinRot.value, 10) : 10,
         bandwidth_limit_enabled: cfgBwEnabled ? cfgBwEnabled.checked : false,

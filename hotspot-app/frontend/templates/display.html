@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ settings.school_name }} — Public Display</title>
   <link rel="stylesheet" href="/static/css/styles.css" />
+  <style>
+    :root {
+      --maroon-deep: {{ settings.primary_color | default('#580f1a') }};
+      --gold-primary: {{ settings.secondary_color | default('#f2a900') }};
+    }
+  </style>
 </head>
 <body>
   <header class="top-banner">

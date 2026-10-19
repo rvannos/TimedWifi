@@ -41,6 +41,8 @@ class SessionManager:
             "ssid": settings.get("ssid", "School_Event_Pay"),
             "wpa_passphrase": settings.get("wpa_passphrase", ""),
             "school_name": settings.get("school_name", "Event Fast-Pay Wireless"),
+            "primary_color": settings.get("primary_color", "#580f1a"),
+            "secondary_color": settings.get("secondary_color", "#f2a900"),
             "session_duration_minutes": int(settings.get("session_duration_minutes", 10)),
         }
 

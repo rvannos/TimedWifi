@@ -26,6 +26,8 @@ DEFAULT_SETTINGS = {
     "dhcp_start": "192.168.4.10",
     "dhcp_end": "192.168.4.200",
     "school_name": "Event Fast-Pay Wireless",
+    "primary_color": "#580f1a",
+    "secondary_color": "#f2a900",
     "mock_network": os.environ.get("MOCK_NETWORK", "true").lower() in ("true", "1", "yes"),
 }
 
@@ -46,6 +48,8 @@ class SettingsModel(BaseModel):
     dhcp_start: str = "192.168.4.10"
     dhcp_end: str = "192.168.4.200"
     school_name: str = "Event Fast-Pay Wireless"
+    primary_color: str = "#580f1a"
+    secondary_color: str = "#f2a900"
     mock_network: bool = True
 
 

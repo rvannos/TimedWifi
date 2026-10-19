@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>{{ settings.school_name }} — Connect to Pay</title>
   <link rel="stylesheet" href="/static/css/styles.css" />
+  <style>
+    :root {
+      --maroon-deep: {{ settings.primary_color | default('#580f1a') }};
+      --gold-primary: {{ settings.secondary_color | default('#f2a900') }};
+    }
+  </style>
 </head>
 <body>
   <div class="portal-wrapper">

@@ -66,6 +66,12 @@
       if (schoolNameEl && data.school_name) {
         schoolNameEl.textContent = data.school_name;
       }
+      if (data.primary_color) {
+        document.documentElement.style.setProperty("--maroon-deep", data.primary_color);
+      }
+      if (data.secondary_color) {
+        document.documentElement.style.setProperty("--gold-primary", data.secondary_color);
+      }
 
       renderCountdown();
     } catch (err) {

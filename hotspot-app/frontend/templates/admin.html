@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ settings.school_name }} — Admin &amp; Operations</title>
   <link rel="stylesheet" href="/static/css/styles.css" />
+  <style>
+    :root {
+      --maroon-deep: {{ settings.primary_color | default('#580f1a') }};
+      --gold-primary: {{ settings.secondary_color | default('#f2a900') }};
+    }
+  </style>
 </head>
 <body>
   <header class="top-banner">
@@ -105,9 +111,9 @@
         </div>
       </section>
 
-      <!-- 2. Network & Access Controls -->
+      <!-- 2. Network, Branding & Access Controls -->
       <section class="admin-panel">
-        <h2>2. Network &amp; Access Controls</h2>
+        <h2>2. Network, Theme &amp; Timers</h2>
 
         <div class="form-group">
           <label for="cfg-school-name">Event / Display Header Title</label>
@@ -117,6 +123,25 @@
         <div class="form-group">
           <label for="cfg-ssid">Wi-Fi SSID Name</label>
           <input type="text" id="cfg-ssid" class="form-control" placeholder="School_Event_Pay" />
+        </div>
+
+        <div class="form-group">
+          <label style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Theme Colors (Primary &amp; Accent)</span>
+            <button type="button" id="reset-colors-btn" style="background: none; border: none; color: var(--gold-primary); font-size: 0.78rem; cursor: pointer; text-decoration: underline;">
+              Reset Maroon &amp; Gold
+            </button>
+          </label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; background: var(--maroon-dark); padding: 0.4rem 0.65rem; border-radius: 8px; border: 1px solid var(--maroon-border);">
+              <input type="color" id="cfg-primary-color" value="#580f1a" style="width: 34px; height: 30px; border: none; background: none; cursor: pointer;" />
+              <span id="lbl-primary-color" style="font-family: monospace; font-size: 0.85rem;">#580f1a</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; background: var(--maroon-dark); padding: 0.4rem 0.65rem; border-radius: 8px; border: 1px solid var(--maroon-border);">
+              <input type="color" id="cfg-secondary-color" value="#f2a900" style="width: 34px; height: 30px; border: none; background: none; cursor: pointer;" />
+              <span id="lbl-secondary-color" style="font-family: monospace; font-size: 0.85rem;">#f2a900</span>
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
