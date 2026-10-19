@@ -238,6 +238,10 @@ async def api_admin_overview(_: bool = Depends(verify_admin)):
 @app.post("/api/admin/settings")
 async def api_admin_update_settings(new_settings: Dict[str, Any], _: bool = Depends(verify_admin)):
     updated = update_settings(new_settings)
+    if not updated.get("mock_network", True):
+        session_manager.purge_mock_clients()
+    else:
+        session_manager.seed_demo_clients_if_empty()
     # Apply live bandwidth rule or config updates if hotspot is active
     if network_driver.hotspot_active:
         network_driver.generate_dnsmasq_conf(updated)

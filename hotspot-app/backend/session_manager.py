@@ -44,9 +44,24 @@ class SessionManager:
             "session_duration_minutes": int(settings.get("session_duration_minutes", 10)),
         }
 
+    DEMO_CLIENT_IPS = ("192.168.4.14", "192.168.4.22", "192.168.4.35", "192.168.4.77", "192.168.4.88", "192.168.4.99")
+
+    def purge_mock_clients(self):
+        settings = get_settings()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        for ip in self.DEMO_CLIENT_IPS:
+            cursor.execute("DELETE FROM clients WHERE ip = ?", (ip,))
+            network_driver.revoke_client(ip, settings)
+        # Also remove any synthetic pseudo-MAC entries (02:1A:2B:3C:4D:*)
+        cursor.execute("DELETE FROM clients WHERE mac LIKE '02:1A:2B:3C:4D:%'")
+        conn.commit()
+        conn.close()
+
     def seed_demo_clients_if_empty(self):
         settings = get_settings()
         if not settings.get("mock_network", True):
+            self.purge_mock_clients()
             return
         conn = get_db_connection()
         cursor = conn.cursor()
