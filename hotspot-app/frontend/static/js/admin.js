@@ -38,12 +38,18 @@
     };
   }
 
-  function pickOption(selectEl, candidates) {
+  function pickOption(selectEl, prefixes) {
     if (!selectEl) return;
     const opts = Array.from(selectEl.options).map((o) => o.value);
-    for (const c of candidates) {
-      if (opts.includes(c)) {
-        selectEl.value = c;
+    for (const p of prefixes) {
+      const exact = opts.find((o) => o === p);
+      if (exact) {
+        selectEl.value = exact;
+        return;
+      }
+      const prefixMatch = opts.find((o) => o.startsWith(p));
+      if (prefixMatch) {
+        selectEl.value = prefixMatch;
         return;
       }
     }
@@ -55,14 +61,14 @@
     }
     if (applyDefaultIfaces && cfgWan && cfgLan) {
       if (mode === "Mode A") {
-        pickOption(cfgWan, ["enp0s31f6", "eth0", "enp0s3"]);
-        pickOption(cfgLan, ["wlp82s0", "wlan0", "wlp2s0"]);
+        pickOption(cfgWan, ["enx", "enp", "eth0"]);
+        pickOption(cfgLan, ["wlp", "wlan0"]);
       } else if (mode === "Mode B") {
-        pickOption(cfgWan, ["wlp82s0", "wlan0", "wlp2s0"]);
-        pickOption(cfgLan, ["enp0s31f6", "eth0", "eth1"]);
+        pickOption(cfgWan, ["wlp", "wlan0"]);
+        pickOption(cfgLan, ["enx", "enp", "eth0"]);
       } else if (mode === "Mode C") {
-        pickOption(cfgWan, ["enp0s31f6", "eth0"]);
-        pickOption(cfgLan, ["eth1", "enp0s31f6", "eth0"]);
+        pickOption(cfgWan, ["enx", "enp", "eth0"]);
+        pickOption(cfgLan, ["eth1", "enx", "enp"]);
       }
     }
   }
@@ -232,6 +238,10 @@
       if (logoutBtn) logoutBtn.style.display = "inline-block";
 
       const s = data.settings;
+      if (s && document.activeElement !== cfgWan && document.activeElement !== cfgLan) {
+        populateInterfaceDropdown(cfgWan, data.interfaces || [], formInitialized ? cfgWan.value : s.wan_iface);
+        populateInterfaceDropdown(cfgLan, data.interfaces || [], formInitialized ? cfgLan.value : s.lan_iface);
+      }
       if (!formInitialized && s) {
         formInitialized = true;
         if (cfgMode) cfgMode.value = s.mode || "Mode A";

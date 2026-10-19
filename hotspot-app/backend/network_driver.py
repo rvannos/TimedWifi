@@ -58,8 +58,8 @@ class NetworkDriver:
                         ifaces.append(item.name)
         except Exception:
             pass
-        # Always include standard interface names so dropdowns work in all modes
-        for std in ["wlan0", "eth0", "eth1", "enp0s3", "wlp2s0"]:
+        # Append fallback placeholder names only if needed
+        for std in ["wlan0", "eth0", "eth1"]:
             if std not in ifaces:
                 ifaces.append(std)
         return ifaces

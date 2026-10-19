@@ -12,7 +12,7 @@ DB_PATH = DATA_DIR / "hotspot.db"
 
 DEFAULT_SETTINGS = {
     "mode": "Mode A",  # "Mode A", "Mode B", "Mode C"
-    "wan_iface": "enp0s31f6",
+    "wan_iface": "enx3c18a0d3d673",
     "lan_iface": "wlp82s0",
     "ssid": "School_Event_Pay",
     "wpa_passphrase": "",  # Empty means Open network (captive portal handles PIN)
