@@ -8,7 +8,7 @@ from typing import Dict, Any, List, Optional
 logger = logging.getLogger("hotspot.network")
 
 DNSMASQ_CONF_PATH = "/tmp/dnsmasq_hotspot.conf"
-DNSMASQ_LEASES_PATH = "/tmp/dnsmasq_hotspot.leases"
+DNSMASQ_LEASES_PATH = "/var/lib/misc/dnsmasq.leases"
 HOSTAPD_CONF_PATH = "/tmp/hostapd.conf"
 
 
@@ -30,22 +30,25 @@ class NetworkDriver:
         if len(self.last_command_logs) > 50:
             self.last_command_logs.pop()
 
-    def _run(self, cmd: List[str], mock: bool = True, check: bool = False) -> subprocess.CompletedProcess:
+    def _run(self, cmd: List[str], mock: bool = True, check: bool = False, log: bool = True) -> subprocess.CompletedProcess:
         cmd_str = " ".join(cmd)
         if mock:
             logger.info("[MOCK] Executing: %s", cmd_str)
-            self._log_cmd(cmd_str, mock=True, rc=0, out="Simulated OK")
+            if log:
+                self._log_cmd(cmd_str, mock=True, rc=0, out="Simulated OK")
             return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="MOCK_OK", stderr="")
         try:
             logger.info("[LIVE] Executing: %s", cmd_str)
             res = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-            self._log_cmd(cmd_str, mock=False, rc=res.returncode, out=(res.stdout or res.stderr).strip())
+            if log:
+                self._log_cmd(cmd_str, mock=False, rc=res.returncode, out=(res.stdout or res.stderr).strip())
             if check and res.returncode != 0:
                 logger.error("Command failed (%d): %s -> %s", res.returncode, cmd_str, res.stderr)
             return res
         except Exception as exc:
             logger.exception("Command execution error: %s", cmd_str)
-            self._log_cmd(cmd_str, mock=False, rc=-1, out=str(exc))
+            if log:
+                self._log_cmd(cmd_str, mock=False, rc=-1, out=str(exc))
             return subprocess.CompletedProcess(args=cmd, returncode=-1, stdout="", stderr=str(exc))
 
     def detect_interfaces(self) -> List[str]:
@@ -118,7 +121,7 @@ rsn_pairwise=CCMP
     def start_hotspot(self, settings: Dict[str, Any], allowed_ips: List[str] = None) -> Dict[str, Any]:
         mock = bool(settings.get("mock_network", True))
         mode = settings.get("mode", "Mode A")
-        wan_iface = settings.get("wan_iface", "enp0s31f6")
+        wan_iface = settings.get("wan_iface", "enx3c18a0d3d673")
         lan_iface = settings.get("lan_iface", "wlp82s0")
         gw_ip = settings.get("gateway_ip", "192.168.4.1")
 
@@ -128,8 +131,8 @@ rsn_pairwise=CCMP
             self.generate_hostapd_conf(settings)
 
         # 2. Stop existing instances cleanly
-        self._run(["sudo", "/usr/bin/pkill", "-f", DNSMASQ_CONF_PATH], mock=mock)
-        self._run(["sudo", "/usr/bin/pkill", "-f", HOSTAPD_CONF_PATH], mock=mock)
+        self._run(["sudo", "/usr/bin/pkill", "-f", DNSMASQ_CONF_PATH], mock=mock, log=False)
+        self._run(["sudo", "/usr/bin/pkill", "-f", HOSTAPD_CONF_PATH], mock=mock, log=False)
 
         # 3. Hand off LAN interface from Ubuntu NetworkManager so it doesn't wipe 192.168.4.1 or fight hostapd
         self._run(["/usr/bin/nmcli", "dev", "set", lan_iface, "managed", "no"], mock=mock)
@@ -147,10 +150,12 @@ rsn_pairwise=CCMP
         # 6. Start hostapd ONLY in Mode A
         if mode == "Mode A":
             self._run(["sudo", "/usr/sbin/hostapd", "-B", HOSTAPD_CONF_PATH], mock=mock)
+            if not mock:
+                time.sleep(0.5)
+            self._run(["sudo", "/sbin/ip", "addr", "replace", f"{gw_ip}/24", "dev", lan_iface], mock=mock)
+            self._run(["sudo", "/sbin/ip", "link", "set", lan_iface, "up"], mock=mock)
 
-        # 7. Start dnsmasq
-        if not Path(DNSMASQ_LEASES_PATH).exists():
-            Path(DNSMASQ_LEASES_PATH).write_text("", encoding="utf-8")
+        # 7. Start dnsmasq (uses /var/lib/misc/dnsmasq.leases to satisfy Ubuntu AppArmor)
         self._run(["sudo", "/usr/sbin/dnsmasq", "-C", DNSMASQ_CONF_PATH], mock=mock)
 
         # 8. Configure iptables Captive Portal & NAT
@@ -165,13 +170,13 @@ rsn_pairwise=CCMP
     def stop_hotspot(self, settings: Dict[str, Any]) -> Dict[str, Any]:
         mock = bool(settings.get("mock_network", True))
         lan_iface = settings.get("lan_iface", "wlp82s0")
-        wan_iface = settings.get("wan_iface", "enp0s31f6")
+        wan_iface = settings.get("wan_iface", "enx3c18a0d3d673")
 
         self._run(["sudo", "/usr/bin/pkill", "-f", DNSMASQ_CONF_PATH], mock=mock)
         self._run(["sudo", "/usr/bin/pkill", "-f", HOSTAPD_CONF_PATH], mock=mock)
         self._run(["sudo", "/sbin/iptables", "-F", "FORWARD"], mock=mock)
         self._run(["sudo", "/sbin/iptables", "-t", "nat", "-F", "PREROUTING"], mock=mock)
-        self._run(["sudo", "/sbin/iptables", "-t", "nat", "-D", "POSTROUTING", "-o", wan_iface, "-j", "MASQUERADE"], mock=mock)
+        self._run(["sudo", "/sbin/iptables", "-t", "nat", "-D", "POSTROUTING", "-o", wan_iface, "-j", "MASQUERADE"], mock=mock, log=False)
 
         # Return LAN interface back to Ubuntu NetworkManager
         self._run(["sudo", "/sbin/ip", "addr", "flush", "dev", lan_iface], mock=mock)
@@ -225,8 +230,8 @@ rsn_pairwise=CCMP
 
         # Delete first to avoid duplicate entries in live mode
         if not mock:
-            self._run(["sudo", "/sbin/iptables", "-D", "FORWARD", "-s", client_ip, "-j", "ACCEPT"], mock=False)
-            self._run(["sudo", "/sbin/iptables", "-t", "nat", "-D", "PREROUTING", "-i", lan_iface, "-s", client_ip, "-j", "ACCEPT"], mock=False)
+            self._run(["sudo", "/sbin/iptables", "-D", "FORWARD", "-s", client_ip, "-j", "ACCEPT"], mock=False, log=False)
+            self._run(["sudo", "/sbin/iptables", "-t", "nat", "-D", "PREROUTING", "-i", lan_iface, "-s", client_ip, "-j", "ACCEPT"], mock=False, log=False)
 
         # Exact specification rule: Insert -I FORWARD 1 -s <CLIENT_IP> -j ACCEPT
         self._run(["sudo", "/sbin/iptables", "-I", "FORWARD", "1", "-s", client_ip, "-j", "ACCEPT"], mock=mock)

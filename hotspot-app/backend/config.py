@@ -82,13 +82,6 @@ def init_db():
             "INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)",
             (k, json.dumps(v))
         )
-    # Respect explicit MOCK_NETWORK env override on startup
-    if "MOCK_NETWORK" in os.environ:
-        mock_val = os.environ["MOCK_NETWORK"].lower() in ("true", "1", "yes")
-        cursor.execute(
-            "INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)",
-            ("mock_network", json.dumps(mock_val))
-        )
     conn.commit()
     conn.close()
 

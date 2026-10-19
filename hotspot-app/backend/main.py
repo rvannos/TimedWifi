@@ -31,9 +31,7 @@ async def lifespan(app: FastAPI):
     init_db()
     settings = get_settings()
     session_manager.seed_demo_clients_if_empty()
-    # Auto-start mock hotspot in dry-run mode so status pills look ready immediately
-    if settings.get("mock_network", True):
-        network_driver.start_hotspot(settings, session_manager.get_authorized_ips())
+    network_driver.start_hotspot(settings, session_manager.get_authorized_ips())
     session_manager.start_background_loop()
     yield
 
