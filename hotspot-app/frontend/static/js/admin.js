@@ -15,6 +15,7 @@
   const cfgMock = document.getElementById("cfg-mock-network");
   const cfgSchoolName = document.getElementById("cfg-school-name");
   const cfgSsid = document.getElementById("cfg-ssid");
+  const cfgWifiChannel = document.getElementById("cfg-wifi-channel");
   const cfgSessionDur = document.getElementById("cfg-session-duration");
   const lblSessionDur = document.getElementById("lbl-session-duration");
   const cfgPinRot = document.getElementById("cfg-pin-rotation");
@@ -286,6 +287,7 @@
         if (cfgMock) cfgMock.checked = Boolean(s.mock_network);
         if (cfgSchoolName) cfgSchoolName.value = s.school_name || "";
         if (cfgSsid) cfgSsid.value = s.ssid || "";
+        if (cfgWifiChannel) cfgWifiChannel.value = String(s.wifi_channel || 6);
         if (cfgSessionDur) cfgSessionDur.value = s.session_duration_minutes || 10;
         if (lblSessionDur) lblSessionDur.textContent = s.session_duration_minutes || 10;
         if (cfgPinRot) cfgPinRot.value = s.pin_rotation_minutes || 10;
@@ -354,6 +356,7 @@
         mock_network: cfgMock ? cfgMock.checked : true,
         school_name: cfgSchoolName ? cfgSchoolName.value.trim() : "Event Fast-Pay Wireless",
         ssid: cfgSsid ? cfgSsid.value.trim() : "School_Event_Pay",
+        wifi_channel: cfgWifiChannel ? parseInt(cfgWifiChannel.value, 10) : 6,
         primary_color: cfgPrimaryColor ? cfgPrimaryColor.value : "#580f1a",
         secondary_color: cfgSecondaryColor ? cfgSecondaryColor.value : "#f2a900",
         session_duration_minutes: cfgSessionDur ? parseInt(cfgSessionDur.value, 10) : 10,

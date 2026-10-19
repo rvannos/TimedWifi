@@ -120,9 +120,27 @@
           <input type="text" id="cfg-school-name" class="form-control" placeholder="Event Fast-Pay Wireless" />
         </div>
 
-        <div class="form-group">
-          <label for="cfg-ssid">Wi-Fi SSID Name</label>
-          <input type="text" id="cfg-ssid" class="form-control" placeholder="School_Event_Pay" />
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label for="cfg-ssid">Wi-Fi SSID Name</label>
+            <input type="text" id="cfg-ssid" class="form-control" placeholder="School_Event_Pay" />
+          </div>
+          <div class="form-group">
+            <label for="cfg-wifi-channel" title="Non-overlapping 2.4 GHz channels are 1, 6, and 11">Wi-Fi Channel</label>
+            <select id="cfg-wifi-channel" class="form-control">
+              <option value="1">Ch 1 (2.4 GHz)</option>
+              <option value="6" selected>Ch 6 (Default)</option>
+              <option value="11">Ch 11 (2.4 GHz)</option>
+              <option value="2">Ch 2</option>
+              <option value="3">Ch 3</option>
+              <option value="4">Ch 4</option>
+              <option value="5">Ch 5</option>
+              <option value="7">Ch 7</option>
+              <option value="8">Ch 8</option>
+              <option value="9">Ch 9</option>
+              <option value="10">Ch 10</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-group">

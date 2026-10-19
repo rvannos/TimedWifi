@@ -72,7 +72,7 @@ If you deploy **2 laptops** at the same event (e.g., **Concessions / Admissions 
    - Because the QR code on `/display` dynamically encodes that laptop's configured SSID, guests simply scan the screen in front of them and enter the 4-digit PIN shown on that same screen.
 2. **Avoid Wi-Fi Channel Overlap (Mode A):**
    - Each laptop runs an independent `192.168.4.1/24` NAT subnet behind its own WAN connection, so IP ranges will **not** conflict between the two laptops.
-   - If the two laptops are physically near each other, you can set different 2.4 GHz channels (`wifi_channel` in `config.py`, e.g., Channel `1` on Laptop 1, Channel `6` or `11` on Laptop 2) to prevent radio interference.
+   - If the two laptops are physically near each other, select different **Wi-Fi Channels** in `/admin` under **Panel 2** (e.g., `Ch 1` on Laptop 1, `Ch 6` or `Ch 11` on Laptop 2) to prevent 2.4 GHz radio interference.
 
 ---
 
