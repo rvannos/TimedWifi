@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>{{ settings.school_name }} — Connect to Pay</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <div class="portal-wrapper">
+    <div class="portal-card">
+      <div class="portal-header-icon">⚡</div>
+      <div class="brand-subtitle" style="margin-bottom: 0.25rem;">{{ settings.ssid }}</div>
+      <h1 style="font-size: 1.65rem; font-weight: 800; color: var(--cream-white);">
+        {{ settings.school_name }}
+      </h1>
+
+      <!-- Login Form View -->
+      <div id="portal-login-view" style="{% if client_status.authenticated %}display: none;{% endif %}">
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.45rem;">
+          Enter the 4-digit Access PIN shown on the event display screen.
+        </p>
+
+        <form id="portal-auth-form" autocomplete="off">
+          <input
+            type="text"
+            id="pin-input"
+            class="portal-pin-input"
+            inputmode="numeric"
+            pattern="[0-9]{4}"
+            maxlength="4"
+            placeholder="••••"
+            autofocus
+            required
+          />
+
+          <div id="portal-error-msg" style="display: none; color: #ff8a80; background: rgba(255, 82, 82, 0.16); border: 1px solid #ff5252; border-radius: 8px; padding: 0.65rem; margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;"></div>
+
+          <button type="submit" id="connect-btn" class="btn-gold">
+            Connect to Pay
+          </button>
+        </form>
+
+        <div class="portal-info-box">
+          Once connected, you will have <strong style="color: var(--gold-primary);">{{ settings.session_duration_minutes }} minutes</strong> of high-speed access to complete your <strong>Venmo / Cash App</strong> transaction.
+        </div>
+      </div>
+
+      <!-- Connected / Success Confirmation View -->
+      <div id="portal-connected-view" style="{% if not client_status.authenticated %}display: none;{% endif %} margin-top: 1.2rem;">
+        <div style="background: rgba(46, 204, 113, 0.16); border: 2px solid var(--success-green); border-radius: 14px; padding: 1.35rem; margin-bottom: 1.25rem;">
+          <div style="font-size: 2.2rem; margin-bottom: 0.3rem;">✅</div>
+          <h2 style="font-size: 1.35rem; color: #7ef7ae; font-weight: 800;">You're Connected!</h2>
+          <p style="color: var(--cream-white); font-size: 0.95rem; margin-top: 0.35rem;">
+            High-speed payment access is active for device <code style="color: var(--gold-primary);">{{ client_ip }}</code>
+          </p>
+          <div style="margin-top: 1rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">
+            Remaining Session Time
+          </div>
+          <div id="portal-remaining-timer" style="font-size: 2.6rem; font-weight: 900; color: var(--gold-primary); font-variant-numeric: tabular-nums;">
+            --:--
+          </div>
+        </div>
+
+        <button type="button" id="done-btn" class="btn-gold">
+          Done — Open Payment App
+        </button>
+
+        <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+          You may now close this screen and open Venmo, Cash App, or your mobile wallet.
+        </p>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.25rem; font-size: 0.8rem; color: var(--text-muted); opacity: 0.85;">
+      Client IP: {{ client_ip }} &bull; <a href="/display">View Display Screen</a>
+    </div>
+  </div>
+
+  <script>
+    window.INITIAL_CLIENT_STATUS = {{ client_status | tojson }};
+  </script>
+  <script src="/static/js/portal.js"></script>
+</body>
+</html>

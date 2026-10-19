@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ settings.school_name }} — Admin &amp; Operations</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <header class="top-banner">
+    <div class="brand-title">
+      <div class="brand-crest">⚙️</div>
+      <div>
+        <div class="brand-subtitle">Hotspot Operations Center</div>
+        <h1>Admin &amp; Network Controller</h1>
+      </div>
+    </div>
+    <div class="nav-pills">
+      <span class="pill-badge gold" id="admin-pin-pill">PIN: ----</span>
+      <a href="/display" class="pill-badge">📺 Public Display</a>
+      <a href="/portal" class="pill-badge">📱 Mobile Portal</a>
+      <button type="button" id="logout-btn" class="btn-sm outline" style="display: none;">Lock Admin</button>
+    </div>
+  </header>
+
+  <!-- Password Gate Modal / Card -->
+  <div id="admin-login-gate" class="portal-wrapper" style="min-height: calc(100vh - 95px);">
+    <div class="portal-card">
+      <div class="portal-header-icon">🔒</div>
+      <div class="brand-subtitle">Protected Operations</div>
+      <h2 style="font-size: 1.5rem; margin: 0.3rem 0 0.75rem;">Enter Admin Password</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+        Default password is <code style="color: var(--gold-primary);">admin</code>
+      </p>
+      <form id="admin-login-form">
+        <input
+          type="password"
+          id="admin-password-input"
+          class="form-control"
+          placeholder="Admin Password"
+          style="font-size: 1.15rem; text-align: center; margin-bottom: 1rem;"
+          required
+        />
+        <div id="admin-login-error" style="display: none; color: #ff8a80; margin-bottom: 0.85rem; font-size: 0.9rem;"></div>
+        <button type="submit" class="btn-gold">Unlock Dashboard</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Admin Dashboard Content -->
+  <main id="admin-dashboard" class="admin-container" style="display: none;">
+    <!-- Service Controls & Live Daemon Status Bar -->
+    <section class="admin-panel" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;">
+        <span style="font-weight: 800; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem;">
+          Daemon Status:
+        </span>
+        <span class="pill-badge" id="pill-dnsmasq">DNS/DHCP: --</span>
+        <span class="pill-badge" id="pill-hostapd">Hostapd: --</span>
+        <span class="pill-badge" id="pill-nat">NAT / Firewall: --</span>
+        <span class="pill-badge gold" id="pill-mock-mode">Mode: --</span>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn-sm success" data-service-action="start">▶ Start Hotspot</button>
+        <button type="button" class="btn-sm danger" data-service-action="stop">⏹ Stop Hotspot</button>
+        <button type="button" class="btn-sm gold" data-service-action="restart">↻ Restart Services</button>
+        <button type="button" id="force-rotate-pin-btn" class="btn-sm outline">🎲 Rotate PIN Now</button>
+      </div>
+    </section>
+
+    <div class="admin-grid-top">
+      <!-- 1. Topology & Interface Selector -->
+      <section class="admin-panel">
+        <h2>1. Topology &amp; Interfaces</h2>
+
+        <div class="form-group">
+          <label for="cfg-mode">Hardware Topology Mode</label>
+          <select id="cfg-mode" class="form-control">
+            <option value="Mode A">Mode A: All-in-One (Internal Wi-Fi AP + Eth WAN)</option>
+            <option value="Mode B">Mode B: Wi-Fi WAN + USB Ethernet LAN (External AP)</option>
+            <option value="Mode C">Mode C: Ethernet WAN + USB Ethernet LAN (External AP)</option>
+          </select>
+        </div>
+
+        <div id="topology-helper-text" style="font-size: 0.84rem; color: var(--gold-primary); background: rgba(0,0,0,0.3); padding: 0.65rem 0.8rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid var(--gold-primary);">
+          Mode A runs hostapd on wlan0 and NATs to eth0.
+        </div>
+
+        <div class="form-group">
+          <label for="cfg-wan-iface">WAN (Upstream Internet) Interface</label>
+          <select id="cfg-wan-iface" class="form-control"></select>
+        </div>
+
+        <div class="form-group">
+          <label for="cfg-lan-iface">LAN / Hotspot Interface</label>
+          <select id="cfg-lan-iface" class="form-control"></select>
+        </div>
+
+        <div class="form-group" style="margin-top: 0.75rem;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="cfg-mock-network" />
+            <span>Dry-Run Mock Mode (Simulate iptables/hostapd safely)</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 2. Network & Access Controls -->
+      <section class="admin-panel">
+        <h2>2. Network &amp; Access Controls</h2>
+
+        <div class="form-group">
+          <label for="cfg-school-name">Event / Display Header Title</label>
+          <input type="text" id="cfg-school-name" class="form-control" placeholder="Event Fast-Pay Wireless" />
+        </div>
+
+        <div class="form-group">
+          <label for="cfg-ssid">Wi-Fi SSID Name</label>
+          <input type="text" id="cfg-ssid" class="form-control" placeholder="School_Event_Pay" />
+        </div>
+
+        <div class="form-group">
+          <label for="cfg-session-duration">
+            Guest Session Duration: <strong id="lbl-session-duration" style="color: var(--gold-primary);">10</strong> min (3–30m)
+          </label>
+          <input
+            type="range"
+            id="cfg-session-duration"
+            min="3"
+            max="30"
+            step="1"
+            value="10"
+            style="width: 100%; accent-color: var(--gold-primary);"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="cfg-pin-rotation">
+            PIN Rotation Interval: <strong id="lbl-pin-rotation" style="color: var(--gold-primary);">10</strong> min
+          </label>
+          <input
+            type="range"
+            id="cfg-pin-rotation"
+            min="1"
+            max="60"
+            step="1"
+            value="10"
+            style="width: 100%; accent-color: var(--gold-primary);"
+          />
+        </div>
+      </section>
+
+      <!-- 3. Traffic Shaping & Security -->
+      <section class="admin-panel">
+        <h2>3. Bandwidth &amp; Security</h2>
+
+        <div class="form-group">
+          <label class="toggle-switch">
+            <input type="checkbox" id="cfg-bw-enabled" />
+            <span>Enable Per-Client Bandwidth Limit (via <code>tc</code>)</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="cfg-bw-mbps">Rate Limit (Mbps)</label>
+          <input type="number" id="cfg-bw-mbps" class="form-control" min="1" max="100" value="5" />
+        </div>
+
+        <div class="form-group">
+          <label for="cfg-wpa-pass">WPA2 Passphrase (Optional — Leave blank for Open + PIN Portal)</label>
+          <input type="text" id="cfg-wpa-pass" class="form-control" placeholder="Open Network (Recommended for QR)" />
+        </div>
+
+        <div class="form-group">
+          <label for="cfg-admin-pass">Admin Dashboard Password</label>
+          <input type="password" id="cfg-admin-pass" class="form-control" placeholder="admin" />
+        </div>
+
+        <button type="button" id="save-settings-btn" class="btn-gold" style="margin-top: 0.5rem;">
+          💾 Save Configuration
+        </button>
+        <div id="save-toast" style="display: none; margin-top: 0.6rem; color: #7ef7ae; font-size: 0.88rem; font-weight: 700; text-align: center;">
+          ✔ Settings saved and applied!
+        </div>
+      </section>
+    </div>
+
+    <!-- Live Connected Clients Table -->
+    <section class="admin-panel">
+      <h2>
+        <span>Live Connected Clients &amp; Whitelist</span>
+        <div class="btn-row">
+          <button type="button" id="add-whitelist-btn" class="btn-sm outline">+ Add Staff Device by IP</button>
+          <button type="button" id="refresh-clients-btn" class="btn-sm gold">↻ Refresh</button>
+        </div>
+      </h2>
+
+      <div class="table-responsive">
+        <table class="clients-table">
+          <thead>
+            <tr>
+              <th>Hostname</th>
+              <th>IP Address</th>
+              <th>MAC Address</th>
+              <th>First Seen</th>
+              <th>Session Time Remaining</th>
+              <th>Always-On / Staff Whitelist</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clients-tbody">
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted);">Loading connected clients...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Network Command Execution Audit Log -->
+    <section class="admin-panel">
+      <h2>Recent System Network Operations (iptables / dnsmasq / hostapd)</h2>
+      <div id="cmd-log-box" style="font-family: monospace; font-size: 0.83rem; background: rgba(25, 3, 6, 0.7); padding: 0.9rem; border-radius: 8px; max-height: 180px; overflow-y: auto; color: #f5d77f;">
+        No commands logged yet.
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/js/admin.js"></script>
+</body>
+</html>

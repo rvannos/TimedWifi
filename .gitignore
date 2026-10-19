@@ -1,0 +1,21 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+hotspot-app/.venv/
+
+# Local SQLite database & runtime data
+hotspot-app/data/*.db
+hotspot-app/data/*.db-journal
+*.db
+
+# OS / Editor files
+.DS_Store
+.vscode/
+.idea/
+*.swp

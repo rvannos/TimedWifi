@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ settings.school_name }} — Public Display</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <header class="top-banner">
+    <div class="brand-title">
+      <div class="brand-crest">⚡</div>
+      <div>
+        <div class="brand-subtitle">Timed Express Payment Hotspot</div>
+        <h1 id="header-school-name">{{ settings.school_name }}</h1>
+      </div>
+    </div>
+    <div class="nav-pills">
+      <span class="pill-badge gold" id="badge-mode">{{ settings.mode }}</span>
+      <span class="pill-badge {% if settings.mock_network %}gold{% else %}green{% endif %}" id="badge-env">
+        {% if settings.mock_network %}DRY-RUN MOCK MODE{% else %}LIVE NETWORK{% endif %}
+      </span>
+      <a href="/portal" class="pill-badge" title="Preview Captive Portal">📱 Mobile Portal</a>
+      <a href="/admin" class="pill-badge" title="Admin Dashboard">⚙️ Admin</a>
+    </div>
+  </header>
+
+  <main class="display-container">
+    <!-- Left Column: Step-by-Step Instructions & QR Code -->
+    <section class="card-maroon">
+      <div>
+        <div class="brand-subtitle" style="margin-bottom: 0.35rem;">Quick Guest Check-In</div>
+        <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--cream-white);">
+          Connect &amp; Complete Your Mobile Payment
+        </h2>
+        <p style="color: var(--text-muted); font-size: 1.08rem; margin-top: 0.4rem;">
+          Follow these two simple steps for temporary high-speed access to Venmo, Cash App, Apple Pay, or PayPal.
+        </p>
+
+        <div class="steps-list">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-text">
+              <h3>Connect to Wi-Fi Network:</h3>
+              <div class="step-highlight" id="display-ssid">{{ settings.ssid }}</div>
+            </div>
+          </div>
+
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-text">
+              <h3>Enter Current Access PIN on Splash Screen:</h3>
+              <div style="font-size: 1.15rem; color: var(--cream-white); font-weight: 600;">
+                Gives you <strong style="color: var(--gold-primary);" id="display-session-mins">{{ settings.session_duration_minutes }} minutes</strong> of instant payment connectivity.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="qr-row">
+        <div class="qr-box">
+          <img id="wifi-qr-img" src="/api/qr.svg" alt="Wi-Fi QR Code" />
+        </div>
+        <div>
+          <div class="brand-subtitle">Instant Camera Scan</div>
+          <h3 style="font-size: 1.4rem; margin: 0.25rem 0 0.4rem; color: var(--cream-white);">
+            Scan to Join <span id="qr-ssid-label" style="color: var(--gold-primary);">{{ settings.ssid }}</span>
+          </h3>
+          <p style="color: var(--text-muted); font-size: 0.96rem;">
+            Point your iPhone or Android camera at the QR code to join the Wi-Fi automatically, then enter the 4-digit PIN shown on the right.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Large High-Visibility 4-Digit PIN & Progress Ring -->
+    <section class="pin-showcase-card">
+      <div class="pin-label-badge">Current Access PIN</div>
+
+      <div class="pin-ring-wrapper">
+        <svg class="pin-ring-svg" viewBox="0 0 260 260">
+          <circle class="pin-ring-bg" cx="130" cy="130" r="116"></circle>
+          <circle
+            id="pin-ring-circle"
+            class="pin-ring-progress"
+            cx="130"
+            cy="130"
+            r="116"
+            stroke-dasharray="728.85"
+            stroke-dashoffset="0"
+          ></circle>
+        </svg>
+        <div id="pin-code-text" class="pin-code-giant">{{ pin_info.pin }}</div>
+      </div>
+
+      <div class="pin-countdown-bar-wrap">
+        <div id="pin-countdown-bar" class="pin-countdown-bar-fill"></div>
+      </div>
+
+      <p class="rotation-caption">
+        Code rotates in <strong id="pin-countdown-text">--:--</strong>
+        (every <span id="pin-rotation-mins">{{ pin_info.rotation_minutes }}</span> min)
+      </p>
+
+      <div style="margin-top: 1.75rem; font-size: 0.95rem; color: var(--text-muted); background: rgba(0,0,0,0.28); padding: 0.75rem 1.25rem; border-radius: 999px; border: 1px solid rgba(242,169,0,0.25);">
+        Need more time? Simply re-enter the current PIN if your session expires.
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/js/display.js"></script>
+</body>
+</html>
