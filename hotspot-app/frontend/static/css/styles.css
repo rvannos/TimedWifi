@@ -245,8 +245,8 @@ a {
 
 .pin-ring-wrapper {
   position: relative;
-  width: 310px;
-  height: 310px;
+  width: 360px;
+  height: 360px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -277,13 +277,15 @@ a {
 }
 
 .pin-code-giant {
-  font-size: 6.5rem; /* > 72pt (96px+) */
+  font-size: 6rem; /* 72pt = 96px */
   font-weight: 900;
   color: var(--cream-white);
-  letter-spacing: 0.14em;
-  padding-left: 0.14em;
+  letter-spacing: 0.06em;
+  padding-left: 0.06em;
+  line-height: 1;
   text-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
   font-variant-numeric: tabular-nums;
+  z-index: 1;
 }
 
 .pin-countdown-bar-wrap {

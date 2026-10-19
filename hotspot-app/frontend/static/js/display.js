@@ -12,7 +12,7 @@
   const badgeModeEl = document.getElementById("badge-mode");
   const badgeEnvEl = document.getElementById("badge-env");
 
-  const CIRCUMFERENCE = 2 * Math.PI * 116; // r=116 => ~728.85
+  const CIRCUMFERENCE = 2 * Math.PI * 164; // r=164 => ~1030.44
 
   let remainingSeconds = 600;
   let totalSeconds = 600;
@@ -66,13 +66,6 @@
       if (schoolNameEl && data.school_name) {
         schoolNameEl.textContent = data.school_name;
       }
-      if (badgeModeEl && data.mode) {
-        badgeModeEl.textContent = data.mode;
-      }
-      if (badgeEnvEl) {
-        badgeEnvEl.textContent = data.mock_network ? "DRY-RUN MOCK MODE" : "LIVE NETWORK";
-        badgeEnvEl.className = `pill-badge ${data.mock_network ? "gold" : "green"}`;
-      }
 
       renderCountdown();
     } catch (err) {
@@ -94,33 +87,17 @@
   syncDisplayState();
 
   // ---------------------------------------------------------
-  // Screen Wake Lock (Keep Display On) & Fullscreen Toggle
+  // Screen Wake Lock (Keep Display On Silently) & Fullscreen Toggle
   // ---------------------------------------------------------
-  const wakeBadgeEl = document.getElementById("badge-wakelock");
   const fullscreenBtn = document.getElementById("fullscreen-btn");
   let wakeLockSentinel = null;
 
   async function requestScreenWakeLock() {
-    if (!("wakeLock" in navigator)) {
-      if (wakeBadgeEl) {
-        wakeBadgeEl.textContent = "☀️ OS Inhibit Active";
-      }
-      return;
-    }
+    if (!("wakeLock" in navigator)) return;
     try {
       wakeLockSentinel = await navigator.wakeLock.request("screen");
-      if (wakeBadgeEl) {
-        wakeBadgeEl.textContent = "☀️ Screen Awake";
-        wakeBadgeEl.className = "pill-badge green";
-      }
-      wakeLockSentinel.addEventListener("release", () => {
-        if (wakeBadgeEl && document.visibilityState === "visible") {
-          wakeBadgeEl.textContent = "☀️ Click to Keep Awake";
-          wakeBadgeEl.className = "pill-badge gold";
-        }
-      });
     } catch (err) {
-      console.warn("WakeLock request deferred until interaction:", err);
+      // Silently ignore if deferred until user interaction
     }
   }
 
@@ -136,19 +113,38 @@
     }
   });
 
+  function updateFullscreenButtonLabel() {
+    if (!fullscreenBtn) return;
+    const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+    fullscreenBtn.textContent = isFs ? "⛶ Exit Fullscreen" : "⛶ Fullscreen";
+  }
+
+  document.addEventListener("fullscreenchange", updateFullscreenButtonLabel);
+  document.addEventListener("webkitfullscreenchange", updateFullscreenButtonLabel);
+
   if (fullscreenBtn) {
-    fullscreenBtn.addEventListener("click", async () => {
+    fullscreenBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
       try {
-        if (!document.fullscreenElement) {
-          await document.documentElement.requestFullscreen();
-          fullscreenBtn.textContent = "⛶ Exit Fullscreen";
+        const docEl = document.documentElement;
+        const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+        if (!isFs) {
+          if (docEl.requestFullscreen) {
+            await docEl.requestFullscreen();
+          } else if (docEl.webkitRequestFullscreen) {
+            docEl.webkitRequestFullscreen();
+          }
         } else {
-          await document.exitFullscreen();
-          fullscreenBtn.textContent = "⛶ Fullscreen";
+          if (document.exitFullscreen) {
+            await document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
         }
-      } catch (e) {
-        console.warn("Fullscreen error:", e);
+      } catch (err) {
+        console.warn("Fullscreen request failed:", err);
       }
+      updateFullscreenButtonLabel();
       requestScreenWakeLock();
     });
   }
