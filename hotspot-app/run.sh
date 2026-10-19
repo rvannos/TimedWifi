@@ -24,7 +24,7 @@ pip install --quiet --upgrade pip
 pip install --quiet -r requirements.txt
 
 echo "================================================================"
-echo "  School Event Timed Hotspot Controller"
+echo "  Timed Hotspot Controller"
 echo "  MOCK_NETWORK : ${MOCK_NETWORK}"
 echo "  Display UI   : http://localhost:${PORT}/display"
 echo "  Mobile Portal: http://localhost:${PORT}/portal"
@@ -34,7 +34,7 @@ echo "================================================================"
 if command -v systemd-inhibit >/dev/null 2>&1; then
   exec systemd-inhibit --what=idle:sleep:handle-lid-switch \
     --who="TimedWifi Hotspot Controller" \
-    --why="Keep display and hotspot active during school event" \
+    --why="Keep display and hotspot active during event" \
     uvicorn backend.main:app --host "$HOST" --port "$PORT"
 else
   exec uvicorn backend.main:app --host "$HOST" --port "$PORT"

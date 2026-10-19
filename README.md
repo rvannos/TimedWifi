@@ -1,4 +1,4 @@
-# School Event Timed Hotspot Controller (`TimedWifi`)
+# Timed Hotspot Controller (`TimedWifi`)
 
 A full-stack local web application (**Python FastAPI** backend + **Vanilla JS/HTML/CSS** frontend) for Ubuntu Linux that manages a temporary, timed guest payment Wi-Fi hotspot so event attendees can complete mobile transactions (Venmo, Cash App, Apple Pay, PayPal) with minimal bandwidth abuse.
 

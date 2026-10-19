@@ -1,6 +1,6 @@
 # AGENTS.md — AI Coding Agent Configuration & Project Guidelines
 
-This file defines the architecture, conventions, operational guardrails, and development workflow for AI coding agents (Antigravity, Claude Code, Cursor, GitHub Copilot, etc.) working in the **School Event Timed Hotspot Controller (`TimedWifi`)** repository.
+This file defines the architecture, conventions, operational guardrails, and development workflow for AI coding agents (Antigravity, Claude Code, Cursor, GitHub Copilot, etc.) working in the **Timed Hotspot Controller (`TimedWifi`)** repository.
 
 ---
 

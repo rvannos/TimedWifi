@@ -1,1 +1,1 @@
-# School Event Timed Hotspot Controller Backend Package
+# Timed Hotspot Controller Backend Package

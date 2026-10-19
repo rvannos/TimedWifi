@@ -37,7 +37,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="School Event Timed Hotspot Controller",
+    title="Timed Hotspot Controller",
     lifespan=lifespan,
 )
 
