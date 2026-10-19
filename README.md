@@ -58,7 +58,7 @@ chmod +x run.sh
 ```
 
 > **Note on Screen Sleep / Power Saving:**
-> `run.sh` automatically wraps the server in `systemd-inhibit --what=idle:sleep:handle-lid-switch`, and the `/display` page uses the browser **Screen Wake Lock API** (`☀️ Screen Awake`) so the screen will never dim or lock while displaying the QR code and PIN.
+> `run.sh` automatically wraps the server in `systemd-inhibit --what=idle:sleep:handle-lid-switch`, and the `/display` page uses the browser **Screen Wake Lock API** silently in the background so the laptop display will never dim or lock while showing the QR code and PIN.
 
 ---
 
@@ -72,20 +72,44 @@ If you deploy **2 laptops** at the same event (e.g., **Concessions / Admissions 
    - Because the QR code on `/display` dynamically encodes that laptop's configured SSID, guests simply scan the screen in front of them and enter the 4-digit PIN shown on that same screen.
 2. **Avoid Wi-Fi Channel Overlap (Mode A):**
    - Each laptop runs an independent `192.168.4.1/24` NAT subnet behind its own WAN connection, so IP ranges will **not** conflict between the two laptops.
-   - If the two laptops are physically near each other, you can change `"wifi_channel"` (e.g., Channel `1` on Laptop 1, Channel `6` or `11` on Laptop 2) to prevent 2.4 GHz radio interference.
+   - If the two laptops are physically near each other, you can set different 2.4 GHz channels (`wifi_channel` in `config.py`, e.g., Channel `1` on Laptop 1, Channel `6` or `11` on Laptop 2) to prevent radio interference.
+
+---
+
+## External Router AP Bridge Setup (For Mode B & Mode C)
+
+If you use an external Wi-Fi router connected via USB Ethernet (`enx*`) in **Mode B** or **Mode C**:
+1. Set the external router to **Access Point (AP) Bridge Mode** (or disable its built-in DHCP server and plug the laptop's USB Ethernet cable into one of the router's **LAN** ports, *not* its WAN/Internet port).
+2. Set the external router's Wi-Fi SSID to match the **Wi-Fi SSID Name** configured in `/admin` (so the QR code on `/display` joins the external router's Wi-Fi).
+3. `TimedWifi` will automatically assign `192.168.4.1/24` to the USB Ethernet adapter and serve DHCP (`192.168.4.10–200`) and Captive Portal DNS/HTTP redirection to all wireless clients joining that external router.
 
 ---
 
 ## Web Interfaces & Operations
 
 1. **Public Display Screen (`http://localhost:8000/display` or `/`):**
-   - Faced toward attendees (click **`⛶ Fullscreen`** in the top bar for kiosk view).
-   - Displays the 2-step instructions, dynamic Wi-Fi QR code (`/api/qr.svg`), and the 72pt+ 4-digit rotating PIN with a circular progress ring.
+   - Faced toward attendees (click **`⛶ Fullscreen`** in the top bar or press `F11` for kiosk view).
+   - Displays the 2-step instructions, dynamic Wi-Fi QR code (`/api/qr.svg`), and the 72pt+ 4-digit rotating PIN inside a circular countdown progress ring.
 2. **Mobile Captive Portal (`http://localhost:8000/portal`):**
    - Automatically pops up on iOS and Android devices when joining the Wi-Fi (intercepts `/hotspot-detect.html`, `/generate_204`, `/ncsi.txt`, etc.).
-   - Prompts the guest for the 4-digit PIN and inserts `sudo /sbin/iptables -I FORWARD 1 -s <CLIENT_IP> -j ACCEPT`.
+   - Prompts the guest for the 4-digit PIN, inserts `sudo /sbin/iptables -I FORWARD 1 -s <CLIENT_IP> -j ACCEPT`, and provides a **Done** button that triggers Android/iOS captive portal `204` completion so the phone immediately marks the Wi-Fi as connected.
 3. **Admin & Operations Dashboard (`http://localhost:8000/admin`):**
-   - Default password: `admin`
-   - **Topology & Interfaces:** Switch between **Mode A**, **Mode B**, and **Mode C** and select your detected WAN (`enx*` USB Ethernet, `wlp*` Wi-Fi) and LAN interfaces.
-   - **Dry-Run Mock Mode Toggle:** When checked, simulates `iptables`/`hostapd`/`dnsmasq` and seeds sample test devices. Unchecking **Dry-Run Mock Mode** and saving automatically purges all mock/test devices and switches to live hardware enforcement.
+   - Protected by the Admin Password (default: `admin`; configurable under **Panel 3 -> Admin Dashboard Password**; lockable via **Lock Admin** in the top bar).
+   - **Topology & Interfaces (Panel 1):** Switch between **Mode A**, **Mode B**, and **Mode C** and select your detected WAN (`enx*` USB Ethernet, `wlp*` Wi-Fi) and LAN interfaces.
+   - **Dry-Run Mock Mode Toggle (Panel 1):** When checked, simulates `iptables`/`hostapd`/`dnsmasq` and seeds sample test devices. Unchecking **Dry-Run Mock Mode** and saving automatically purges all mock/test devices and switches to live hardware enforcement.
+   - **Theme Colors & Timers (Panel 2):** Customize the Event Header Title, Wi-Fi SSID, **Primary & Secondary Theme Colors** (defaults to Deep Maroon `#580f1a` & Athletic Warm Gold `#f2a900`), Guest Session Duration (3–30 min), and PIN Rotation Interval.
    - **Live Connected Clients & Whitelist:** Revoke/disconnect active guests or toggle **Always-On / Staff Whitelist** for POS iPads and staff devices.
+
+---
+
+## Troubleshooting & Event Recovery
+
+- **Restoring Normal Laptop Wi-Fi After the Event:**
+  Click **⏹ Stop Hotspot** in `/admin` (which flushes `192.168.4.1` and runs `nmcli dev set <LAN_IFACE> managed yes` to hand the Wi-Fi card back to Ubuntu NetworkManager). If the app was closed without stopping, run:
+  ```bash
+  sudo pkill -f /tmp/hostapd.conf
+  sudo pkill -f /tmp/dnsmasq_hotspot.conf
+  nmcli dev set wlp82s0 managed yes
+  ```
+- **Resetting Settings or Forgotten Admin Password:**
+  All settings and client sessions are stored in `hotspot-app/data/hotspot.db`. Deleting that file (`rm hotspot-app/data/hotspot.db`) and restarting `./run.sh` resets all settings and the admin password back to `admin`.
