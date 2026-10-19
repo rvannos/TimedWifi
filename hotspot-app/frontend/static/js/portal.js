@@ -95,13 +95,6 @@
     });
   }
 
-  if (doneBtn) {
-    doneBtn.addEventListener("click", () => {
-      // Standard captive portal completion behavior
-      window.location.href = "https://venmo.com";
-    });
-  }
-
   setInterval(() => {
     if (connectedView && connectedView.style.display !== "none") {
       if (!isWhitelisted && remainingSeconds > 0) {
