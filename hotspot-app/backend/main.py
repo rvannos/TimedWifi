@@ -219,6 +219,12 @@ async def api_admin_login(payload: AdminLoginRequest, response: Response):
     return {"success": True}
 
 
+@app.post("/api/admin/logout")
+async def api_admin_logout(response: Response):
+    response.delete_cookie(key="admin_token")
+    return {"success": True}
+
+
 @app.get("/api/admin/overview")
 async def api_admin_overview(_: bool = Depends(verify_admin)):
     settings = get_settings()

@@ -1,5 +1,5 @@
 (function () {
-  let adminToken = sessionStorage.getItem("hotspot_admin_token") || "admin";
+  let adminToken = sessionStorage.getItem("hotspot_admin_token") || "";
   let formInitialized = false;
 
   const loginGate = document.getElementById("admin-login-gate");
@@ -332,9 +332,12 @@
   }
 
   if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
+    logoutBtn.addEventListener("click", async () => {
       adminToken = "";
       sessionStorage.removeItem("hotspot_admin_token");
+      document.cookie = "admin_token=; Max-Age=0; path=/";
+      await fetch("/api/admin/logout", { method: "POST" }).catch(() => {});
+      if (passInput) passInput.value = "";
       if (loginGate) loginGate.style.display = "flex";
       if (dashboard) dashboard.style.display = "none";
       logoutBtn.style.display = "none";
