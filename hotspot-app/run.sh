@@ -31,4 +31,11 @@ echo "  Mobile Portal: http://localhost:${PORT}/portal"
 echo "  Admin Panel  : http://localhost:${PORT}/admin (password: admin)"
 echo "================================================================"
 
-exec uvicorn backend.main:app --host "$HOST" --port "$PORT"
+if command -v systemd-inhibit >/dev/null 2>&1; then
+  exec systemd-inhibit --what=idle:sleep:handle-lid-switch \
+    --who="TimedWifi Hotspot Controller" \
+    --why="Keep display and hotspot active during school event" \
+    uvicorn backend.main:app --host "$HOST" --port "$PORT"
+else
+  exec uvicorn backend.main:app --host "$HOST" --port "$PORT"
+fi

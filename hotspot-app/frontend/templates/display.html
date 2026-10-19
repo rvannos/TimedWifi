@@ -16,6 +16,8 @@
       </div>
     </div>
     <div class="nav-pills">
+      <span class="pill-badge green" id="badge-wakelock" title="Screen sleep prevention status">☀️ Screen Awake</span>
+      <button type="button" class="pill-badge" id="fullscreen-btn" style="cursor: pointer;" title="Toggle Fullscreen Display">⛶ Fullscreen</button>
       <span class="pill-badge gold" id="badge-mode">{{ settings.mode }}</span>
       <span class="pill-badge {% if settings.mock_network %}gold{% else %}green{% endif %}" id="badge-env">
         {% if settings.mock_network %}DRY-RUN MOCK MODE{% else %}LIVE NETWORK{% endif %}

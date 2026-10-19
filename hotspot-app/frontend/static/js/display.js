@@ -92,4 +92,66 @@
 
   setInterval(syncDisplayState, 3000);
   syncDisplayState();
+
+  // ---------------------------------------------------------
+  // Screen Wake Lock (Keep Display On) & Fullscreen Toggle
+  // ---------------------------------------------------------
+  const wakeBadgeEl = document.getElementById("badge-wakelock");
+  const fullscreenBtn = document.getElementById("fullscreen-btn");
+  let wakeLockSentinel = null;
+
+  async function requestScreenWakeLock() {
+    if (!("wakeLock" in navigator)) {
+      if (wakeBadgeEl) {
+        wakeBadgeEl.textContent = "☀️ OS Inhibit Active";
+      }
+      return;
+    }
+    try {
+      wakeLockSentinel = await navigator.wakeLock.request("screen");
+      if (wakeBadgeEl) {
+        wakeBadgeEl.textContent = "☀️ Screen Awake";
+        wakeBadgeEl.className = "pill-badge green";
+      }
+      wakeLockSentinel.addEventListener("release", () => {
+        if (wakeBadgeEl && document.visibilityState === "visible") {
+          wakeBadgeEl.textContent = "☀️ Click to Keep Awake";
+          wakeBadgeEl.className = "pill-badge gold";
+        }
+      });
+    } catch (err) {
+      console.warn("WakeLock request deferred until interaction:", err);
+    }
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      requestScreenWakeLock();
+    }
+  });
+
+  document.addEventListener("click", () => {
+    if (!wakeLockSentinel || wakeLockSentinel.released) {
+      requestScreenWakeLock();
+    }
+  });
+
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener("click", async () => {
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+          fullscreenBtn.textContent = "⛶ Exit Fullscreen";
+        } else {
+          await document.exitFullscreen();
+          fullscreenBtn.textContent = "⛶ Fullscreen";
+        }
+      } catch (e) {
+        console.warn("Fullscreen error:", e);
+      }
+      requestScreenWakeLock();
+    });
+  }
+
+  requestScreenWakeLock();
 })();
