@@ -38,20 +38,31 @@
     };
   }
 
+  function pickOption(selectEl, candidates) {
+    if (!selectEl) return;
+    const opts = Array.from(selectEl.options).map((o) => o.value);
+    for (const c of candidates) {
+      if (opts.includes(c)) {
+        selectEl.value = c;
+        return;
+      }
+    }
+  }
+
   function updateTopologyHelper(mode, applyDefaultIfaces = false) {
     if (topologyHelper && TOPOLOGY_DESCRIPTIONS[mode]) {
       topologyHelper.textContent = TOPOLOGY_DESCRIPTIONS[mode];
     }
     if (applyDefaultIfaces && cfgWan && cfgLan) {
       if (mode === "Mode A") {
-        cfgWan.value = "eth0";
-        cfgLan.value = "wlan0";
+        pickOption(cfgWan, ["enp0s31f6", "eth0", "enp0s3"]);
+        pickOption(cfgLan, ["wlp82s0", "wlan0", "wlp2s0"]);
       } else if (mode === "Mode B") {
-        cfgWan.value = "wlan0";
-        cfgLan.value = "eth0";
+        pickOption(cfgWan, ["wlp82s0", "wlan0", "wlp2s0"]);
+        pickOption(cfgLan, ["enp0s31f6", "eth0", "eth1"]);
       } else if (mode === "Mode C") {
-        cfgWan.value = "eth0";
-        cfgLan.value = "eth1";
+        pickOption(cfgWan, ["enp0s31f6", "eth0"]);
+        pickOption(cfgLan, ["eth1", "enp0s31f6", "eth0"]);
       }
     }
   }
